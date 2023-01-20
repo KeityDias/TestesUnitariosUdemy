@@ -7,11 +7,15 @@ package br.ce.wcaquino.servicos;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
+import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
+import br.ce.wcaquino.exceptions.LocadoraException;
 import br.ce.wcaquino.utils.DataUtils;
 import java.util.Date;
 import org.hamcrest.CoreMatchers;
 import static org.hamcrest.CoreMatchers.is;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -47,10 +51,23 @@ public class LocacaoServiceTeste {
      * Rule -> Altera alguns comportamentos dos testes; Error colector pode ser
      * colocado no lugar de assertThat;
      */
+    private LocacaoService service; //Private indica que é uma instância global, para que seja visível todos os testes/classes
+    
     @Rule
     public ErrorCollector error = new ErrorCollector();
     @Rule
     public ExpectedException exception = ExpectedException.none();
+
+    @Before //Inicialização: feito antes dos testes;
+    public void setup() {
+
+       // LocacaoService service = new LocacaoService();  //Instância da classe que desejo testar. Se repete emt todas as classes de teste; 
+    }
+
+    @After //Encerramento: precisa ser fechado, destruído, apenas no final dos testes;
+    public void tearDown() {
+        System.out.println("After");
+    }
 
     /**
      * Test - Indica que a classe possui testes do JUnit; Se o teste não manda
@@ -60,7 +77,6 @@ public class LocacaoServiceTeste {
     public void testeAlugarFilme() throws Exception { //Por conta do throws Exception, é o JUnit que gerencia a exceção lançada;
 
         //cenário: Onde as variáveis são inicializadas;
-        LocacaoService service = new LocacaoService();  //Instância da classe que desejo testar
         //Passa como parâmetro usuário e filme;
         Usuario usuario = new Usuario("Song Kang");
         Filme filme = new Filme("Love Alarme", 2, 5.0); //Nome do filme, quantidade em estoque, preço de locação;
@@ -79,18 +95,18 @@ public class LocacaoServiceTeste {
         error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()), is(true)); //Checa data de locação;
         error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)), is(false)); //Checa data de devolução do filme;
     }
-    
+
     //             ******TRATAMENTO DE ERROS*******
     /**
-     * Forma Elegante: Usada se você puder garantir que a
-     * exceção está vindo apenas por um motivo;
+     * Forma Elegante: Usada se você puder garantir que a exceção está vindo
+     * apenas por um motivo, não traz a mensagem especificando;
      *
      * @throws Exception
      */
-    @Test(expected = Exception.class)//Informa ao teste que existe uma exceção esperada.
-    public void testeFilmeSemEstoque() throws Exception {
+    //@Test(expected = Exception.class)//Informa ao teste que existe uma exceção esperada.
+    @Test(expected = FilmeSemEstoqueException.class)
+    public void testeLocacao_FilmeSemEstoque() throws Exception {
         //Cenário
-        LocacaoService service = new LocacaoService();  //Instância da classe que desejo testar;
         Usuario usuario = new Usuario("Song Kang");
         Filme filme = new Filme("Love Alarme", 2, 5.0); //Nome do filme, quantidade em estoque, preço de locação;
 
@@ -105,38 +121,34 @@ public class LocacaoServiceTeste {
      * @throws Exception
      */
     @Test
-    public void testeFilmeSemEstoque2() throws Exception {
+    public void testeLocacao_UsuarioVazio() throws Exception {
         //Cenário
         LocacaoService service = new LocacaoService();  //Instância da classe que desejo testar;
-        Usuario usuario = new Usuario("Song Kang");
         Filme filme = new Filme("Love Alarme", 2, 5.0); //Nome do filme, quantidade em estoque, preço de locação;
 
         //Ação
         try {
-            service.alugarFilme(usuario, filme); //alugarFilme retorna um objeto locação; 
+            service.alugarFilme(null, filme); //alugarFilme retorna um objeto locação; 
             Assert.fail("Deveria ter lançado alguma exceção!");
-        } catch (Exception e) {
-            Assert.assertThat(e.getMessage(), is("Filme sem estoque."));
+        } catch (LocadoraException e) {
+            Assert.assertThat(e.getMessage(), is("Usuário vazio."));
         }
     }
-    
+
     /**
-     * Forma Atualizada: 
-     * @throws Exception 
+     * Forma Atualizada:
+     *
+     * @throws Exception
      */
     @Test
-    public void testeFilmeSemEstoque3() throws Exception {
+    public void testeLocacao_FilmeVazio() throws FilmeSemEstoqueException, LocadoraException {
         //Cenário
         LocacaoService service = new LocacaoService();  //Instância da classe que desejo testar;
         Usuario usuario = new Usuario("Song Kang");
-        Filme filme = new Filme("Love Alarme", 2, 5.0); //Nome do filme, quantidade em estoque, preço de locação;
 
-        //Ação
-        service.alugarFilme(usuario, filme); //alugarFilme retorna um objeto locação;  
-        
-        exception.expect(Exception.class);       
+        exception.expect(Exception.class);
         exception.expectMessage("Filme sem estoque.");
-
-        
+        //Ação
+        service.alugarFilme(usuario, null); //alugarFilme retorna um objeto locação;  
     }
 }
