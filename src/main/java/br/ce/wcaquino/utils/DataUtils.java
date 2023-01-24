@@ -71,10 +71,10 @@ public class DataUtils {
 	}
 	
 	/**
-	 * Verifica se uma determinada data √© o dia da semana desejado
+	 * Verifica se uma determinada data È o dia da semana desejado
 	 * 
 	 * @param data Data a ser avaliada
-	 * @param diaSemana <code>true</code> caso seja o dia da semana desejado, <code>false</code> em caso contr√°rio 
+	 * @param diaSemana <code>true</code> caso seja o dia da semana desejado, <code>false</code> em caso contr·rio 
 	 * @return
 	 */
 	public static boolean verificarDiaSemana(Date data, int diaSemana) {
