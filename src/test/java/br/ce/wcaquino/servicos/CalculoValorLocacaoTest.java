@@ -4,6 +4,7 @@
  */
 package br.ce.wcaquino.servicos;
 
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
@@ -51,13 +52,13 @@ public class CalculoValorLocacaoTest {
         service = new LocacaoService();
     }
     //Valores da lista armazenados em variáveis
-    private static Filme filme1 = new Filme ("Harry Potter", 2, 4.0);
-    private static Filme filme2 = new Filme ("Pride and Prejudice", 2, 4.0);
-    private static Filme filme3 = new Filme ("Drácula", 2, 4.0);
-    private static Filme filme4 = new Filme ("Um amor para recordar", 2, 4.0);
-    private static Filme filme5 = new Filme ("Business Proposal", 2, 4.0);
-    private static Filme filme6 = new Filme ("Até o último homem", 2, 4.0);
-    private static Filme filme7 = new Filme ("True Beauty", 2, 4.0);
+    private static Filme filme1 = umFilme().agora();
+    private static Filme filme2 = umFilme().agora();
+    private static Filme filme3 = umFilme().agora();
+    private static Filme filme4 = umFilme().agora();
+    private static Filme filme5 = umFilme().agora();
+    private static Filme filme6 = umFilme().agora();
+    private static Filme filme7 = umFilme().agora();
     
     /**
      * Define o conjunto de dados que será testado;

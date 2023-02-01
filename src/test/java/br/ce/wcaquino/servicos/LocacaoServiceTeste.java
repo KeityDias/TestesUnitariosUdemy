@@ -4,13 +4,18 @@ package br.ce.wcaquino.servicos;
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+import br.ce.wcaquino.builders.FilmeBuilder;
+import static br.ce.wcaquino.builders.FilmeBuilder.umFilme;
+import br.ce.wcaquino.builders.UsuarioBuilder;
+import static br.ce.wcaquino.builders.UsuarioBuilder.umUsuario;
 import br.ce.wcaquino.entidades.Filme;
 import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
-import br.ce.wcaquino.matchers.DiaSemanaMatcher;
+import br.ce.wcaquino.matchers.MatcherProprios;
 import static br.ce.wcaquino.matchers.MatcherProprios.caiNumaSegunda;
+import static br.ce.wcaquino.matchers.MatcherProprios.ehHoje;
 import br.ce.wcaquino.utils.DataUtils;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -69,32 +74,9 @@ public class LocacaoServiceTeste {
     public void setup() {
 
         service = new LocacaoService();  //Instância da classe que desejo testar. Se repete emt todas as classes de teste; 
-        //contador++;// Incrementação do contador
-        //System.out.println(contador);
+      
     }
 
-    /*
-    @After //Encerramento: precisa ser fechado, destruído, apenas no final dos testes;
-    public void tearDown() {
-        System.out.println("After");
-    }
-    
-    
-    @BeforeClass //Ao invés de ser executado antes de cada método, é iniciado antes da classe ser instânciada. Precisa ser static para poder ser acessado antes da classe ser criada.
-    public static void setupClass() {
-             System.out.println("Before Class");
-       
-    }
-
-    @AfterClass //Executado após a classe ser instanciada. Precisa ser static para poder ser acessado antes da classe ser criada.
-    public static void tearDownClass() {
-        System.out.println("After Class");
-    }
-     */
-    /**
-     * Test - Indica que a classe possui testes do JUnit. Se o teste não manda
-     * exceção nenhuma, deixe o JUnit gerencie essa parte automaticamente;
-     */
     @Test
     public void deveAlugarFilme() throws Exception { //Por conta do throws Exception, é o JUnit que gerencia a exceção lançada;
         //Esse teste é executado se hoje (new Date()) não for sábado;
@@ -102,25 +84,16 @@ public class LocacaoServiceTeste {
         
         //cenário: Onde as variáveis são inicializadas;
         //Passa como parâmetro usuário e filme;
-        Usuario usuario = new Usuario("Song Kang");
-        List<Filme> filmes = Arrays.asList(new Filme("Love Alarme", 2, 5.0)); //Nome do filme, quantidade em estoque, preço de locação;
+        Usuario usuario = UsuarioBuilder.umUsuario().agora();
+        List<Filme> filmes = Arrays.asList(umFilme().comVaor(5.0).agora());
 
         //Ação: Onde invocamos o método que queremos testar;
         Locacao locacao = service.alugarFilme(usuario, filmes); //alugarFilme retorna um objeto locação;
 
-        /*Validação: Avaliar se o cenário está de acordo com o esperado
-         Para isolar os testes, teria que ser criado uma classe teste para cada uma das assertivas abaixo (Opcional)
-        Assert.assertEquals(5.0, locacao.getValor(), 0.01); //Checa o valor do filme, sendo primeiro vlrEsperado, vlrRecebido, Delta;
-        Assert.assertThat(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()), is(true)); //Checa data de locação;
-        Assert.assertTrue(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1))); //Checa data de devolução do filme;
-        
-         */
-        
-        //error.checkThat(locacao.getDataRetorno(), ehHojeComDiferencaDias(1)); //Recebe uma data no primeiro parametro e um inteiro na chamada;
         
         error.checkThat(locacao.getValor(), CoreMatchers.is(CoreMatchers.equalTo(5.0))); //Valor atual - Matcher
-        error.checkThat(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()), is(true)); //Checa data de locação;
-        error.checkThat(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)), is(false)); //Checa data de devolução do filme;
+        error.checkThat(locacao.getDataRetorno(), MatcherProprios.ehHojeComDiferencaDias(1)); //Recebe uma data no primeiro parametro e um inteiro na chamada;
+        error.checkThat(locacao.getDataLocacao(), ehHoje());
     }
 
     //             ******TRATAMENTO DE ERROS*******
@@ -134,8 +107,8 @@ public class LocacaoServiceTeste {
     @Test(expected = FilmeSemEstoqueException.class)
     public void deveLancarExcecaoAoAlugarFilmeSemEstoque() throws Exception {
         //Cenário
-        Usuario usuario = new Usuario("Song Kang");
-        List<Filme> filmes = Arrays.asList(new Filme("Love Alarme", 0, 5.0)); //Nome do filme, quantidade em estoque, preço de locação;
+        Usuario usuario = umUsuario().agora();
+        List<Filme> filmes = Arrays.asList(FilmeBuilder.umFilmeSemEstoque().agora());//Sem import estatico
 
         //Ação
         service.alugarFilme(usuario, filmes); //alugarFilme retorna um objeto locação;        
@@ -144,14 +117,16 @@ public class LocacaoServiceTeste {
     /**
      * Forma Robusta: Mais indicada por capturar a exceção e permitir o acesso a
      * mensagem vinda dela ;
+Miniatura da aula
+
      *
      * @throws Exception
      */
     @Test
-    public void naoDeveAlugarFilmeSemUsuarioVazio() throws Exception {
+    public void naoDeveAlugarFilmeSemUsuario() throws Exception {
         //Cenário
         // LocacaoService service = new LocacaoService();  //Instância da classe que desejo testar;
-        List<Filme> filmes = Arrays.asList(new Filme("Love Alarme", 2, 5.0)); //Nome do filme, quantidade em estoque, preço de locação;
+        List<Filme> filmes = Arrays.asList(umFilme().agora()); //Com import estático
 
         //Ação
         try {
@@ -172,7 +147,7 @@ public class LocacaoServiceTeste {
     public void naoDeveAlugarFilmeSemFilme() throws FilmeSemEstoqueException, LocadoraException {
         //Cenário
         //  LocacaoService service = new LocacaoService();  //Instância da classe que desejo testar;
-        Usuario usuario = new Usuario("Song Kang");
+        Usuario usuario = UsuarioBuilder.umUsuario().agora();
 
         exception.expect(Exception.class);
         exception.expectMessage("Filme sem estoque.");
@@ -183,7 +158,7 @@ public class LocacaoServiceTeste {
     @Test
     public void devePagar75PctoNoFilme3() throws FilmeSemEstoqueException, LocadoraException {
         // Cenario
-        Usuario usuario = new Usuario("Ana Beatriz");
+        Usuario usuario = UsuarioBuilder.umUsuario().agora();
         List<Filme> filmes = Arrays.asList(
                 new Filme("Harry Potter", 3, 4.0),
                 new Filme("Pride and Prejudice", 2, 4.0),
@@ -201,7 +176,7 @@ public class LocacaoServiceTeste {
     @Test
     public void devePagar50PctoNoFilme4() throws FilmeSemEstoqueException, LocadoraException {
         // Cenario
-        Usuario usuario = new Usuario("Júlia Mayumi");
+        Usuario usuario = UsuarioBuilder.umUsuario().agora();
         List<Filme> filmes = Arrays.asList(
                 new Filme("Harry Potter", 3, 4.0),
                 new Filme("Pride and Prejudice", 2, 4.0),
@@ -220,7 +195,7 @@ public class LocacaoServiceTeste {
     @Test
     public void devePagar25PctoNoFilme5() throws FilmeSemEstoqueException, LocadoraException {
         // Cenario
-        Usuario usuario = new Usuario("Miguel Haruo");
+        Usuario usuario = UsuarioBuilder.umUsuario().agora();
         List<Filme> filmes = Arrays.asList(
                 new Filme("Harry Potter", 3, 4.0),
                 new Filme("Pride and Prejudice", 2, 4.0),
@@ -240,7 +215,7 @@ public class LocacaoServiceTeste {
     @Test
     public void devePagar0PctoNoFilme6() throws FilmeSemEstoqueException, LocadoraException {
         // Cenario
-        Usuario usuario = new Usuario("Suegler Dias");
+        Usuario usuario = UsuarioBuilder.umUsuario().agora();
         List<Filme> filmes = Arrays.asList(
                 new Filme("Harry Potter", 3, 4.0),
                 new Filme("Pride and Prejudice", 2, 4.0),
@@ -268,7 +243,7 @@ public class LocacaoServiceTeste {
         //Executa o teste apenas se estivermos em um sábado.
         
         //cenario
-        Usuario usuario = new Usuario ();
+        Usuario usuario = UsuarioBuilder.umUsuario().agora();
         List <Filme> filmes = Arrays.asList(new Filme ("True Beauty",1, 5.0));
         
         //ação

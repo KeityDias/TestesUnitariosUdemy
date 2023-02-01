@@ -4,6 +4,7 @@
  */
 package br.ce.wcaquino.matchers;
 
+import br.ce.wcaquino.utils.DataUtils;
 import java.util.Date;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -26,7 +27,7 @@ public class DiferencaDiasMatcher extends TypeSafeMatcher <Date> {
     
         @Override
     protected boolean matchesSafely(Date data) {
-        return DataUtils.isMesmaData(data, DataUtils.)
+        return DataUtils.isMesmaData(data, DataUtils.obterDataComDiferencaDias(qtdDias));
     }
     
 }

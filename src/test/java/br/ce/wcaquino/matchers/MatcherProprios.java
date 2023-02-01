@@ -16,4 +16,10 @@ public class MatcherProprios {
         return new DiaSemanaMatcher(Calendar.MONDAY);
 
     }
+    public static DiferencaDiasMatcher ehHojeComDiferencaDias (Integer qtdDias){
+        return new DiferencaDiasMatcher(qtdDias);
+    }
+     public static DiferencaDiasMatcher ehHoje(){
+        return new DiferencaDiasMatcher(0);
+    }
 }
